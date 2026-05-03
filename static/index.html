@@ -4,122 +4,115 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Vaani — voice for paper</title>
-<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
 
-<main class="stage">
-
-  <!-- Left: the phone -->
-  <section class="phone-shell" aria-label="Vaani on a phone">
-    <div class="phone">
-
-      <!-- The full-bleed offline banner — visceral proof of the offline claim -->
-      <div class="offline-banner" id="offline-banner" role="status">
-        <span class="ico">
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-            <path d="M21 16v-2l-8-5V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16z" fill="currentColor"/>
-          </svg>
-        </span>
-        <span class="msg">AIRPLANE MODE · NO INTERNET · GEMMA 4 ON-DEVICE</span>
-      </div>
-
-      <div class="status-bar">
-        <span class="time">9:41</span>
-        <span class="signal-x" title="No signal">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-            <path d="M2 22 22 2M4 18l4-4 4 4 4-4 4 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <span class="battery">87%</span>
-      </div>
-
-      <header class="brand">
-        <h1>Vaani</h1>
-        <p class="tagline">कागज़ दिखाइए, मैं पढ़ कर बता दूँगी।</p>
-      </header>
-
-      <div id="viewport" class="viewport">
-        <video id="cam" autoplay playsinline muted></video>
-        <img id="captured" alt="" hidden>
-        <div id="placeholder" class="placeholder">
-          <svg viewBox="0 0 24 24" width="56" height="56" aria-hidden="true">
-            <path d="M9 2 7 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3l-2-2H9zm3 6a5 5 0 1 1 0 10 5 5 0 0 1 0-10z" fill="currentColor"/>
-          </svg>
-          <p>कागज़ को camera के सामने रखिए</p>
-          <p class="muted">Or tap a sample below</p>
-        </div>
-      </div>
-
-      <div id="conversation" class="conv">
-        <div class="bubble bubble-bot empty">
-          <span>नमस्ते। मैं Vaani हूँ। बोलिए, मैं सुन रही हूँ।</span>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button id="cam-btn" class="circ" aria-label="Take photo">
-          <svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9-3h-3l-2-2H8L6 6H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-9 12a6 6 0 1 1 0-12 6 6 0 0 1 0 12z" fill="currentColor"/></svg>
-        </button>
-
-        <button id="mic-btn" class="circ mic" aria-label="Hold to talk">
-          <svg viewBox="0 0 24 24" width="36" height="36"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" fill="currentColor"/></svg>
-        </button>
-
-        <button id="lang-btn" class="circ" aria-label="Language">
-          <span id="lang-label">हि</span>
-        </button>
-      </div>
-
-      <div class="samples-row" aria-label="Sample papers for the demo">
-        <button class="sample" data-img="/samples/prescription_hindi.jpg" data-name="prescription_hindi.jpg" title="Hindi prescription">
-          <span class="emoji">💊</span>
-        </button>
-        <button class="sample" data-img="/samples/school_notice_english.jpg" data-name="school_notice_english.jpg" title="English school notice">
-          <span class="emoji">🏫</span>
-        </button>
-        <button class="sample" data-img="/samples/ration_receipt_tamil.jpg" data-name="ration_receipt_tamil.jpg" title="Tamil ration receipt">
-          <span class="emoji">🌾</span>
-        </button>
-        <button class="sample" data-img="/samples/marathi_letter.jpg" data-name="marathi_letter.jpg" title="Marathi government letter">
-          <span class="emoji">🏥</span>
-        </button>
-        <button class="sample" data-img="/samples/fever_paper.jpg" data-name="fever_paper.jpg" title="Fever observation note (urgent)">
-          <span class="emoji">🌡️</span>
-        </button>
-      </div>
+<!-- ─── Onboarding (first visit) ────────────────────────────────────────── -->
+<section id="onboarding" class="onboarding" hidden>
+  <div class="onb-card">
+    <div class="onb-greet">
+      <span>नमस्ते</span>
+      <span>வணக்கம்</span>
+      <span>Hello</span>
+      <span>مرحبا</span>
+      <span>नमस्कार</span>
     </div>
-  </section>
+    <h1 class="onb-h">Which language do you speak?</h1>
+    <p class="onb-sub">I'll explain papers to you in this language. You can change it any time.</p>
 
-  <!-- Right: judges' transparency panel -->
-  <aside class="judge-panel" aria-label="Inference & function calls">
-    <h2>What Gemma 4 is doing</h2>
-    <dl class="meta">
-      <dt>Engine</dt><dd id="engine">…</dd>
-      <dt>Last turn</dt><dd id="elapsed">—</dd>
-      <dt>Network</dt><dd id="network" class="ok">…</dd>
-    </dl>
+    <div class="lang-grid" id="lang-grid"><!-- filled by JS --></div>
 
-    <h3>Function calls</h3>
-    <ol id="fn-calls" class="fn-calls">
-      <li class="muted">Tool calls will appear here as they fire.</li>
-    </ol>
+    <details class="lang-more">
+      <summary>More languages</summary>
+      <input id="lang-search" type="search" placeholder="Search 140+ languages…" autocomplete="off">
+      <div class="lang-list" id="lang-list"><!-- filled by JS --></div>
+    </details>
+  </div>
+</section>
 
-    <h3>Why this matters</h3>
-    <p class="why">
-      773&nbsp;million adults worldwide can't read. 91% of them own a phone.
-      Vaani turns any printed paper into spoken explanation in their language —
-      entirely on-device. No subscription. No signal needed.
-    </p>
-    <p class="why">
-      <strong>Built on Gemma 4 E4B.</strong> The first open model that combines
-      vision, native audio, 140 languages, and function calling in a 4&nbsp;GB
-      footprint that runs on a ₹6,000 Android phone.
-    </p>
-  </aside>
+<!-- ─── Main app ─────────────────────────────────────────────────────── -->
+<div id="app-root" hidden>
 
-</main>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">V</span>
+      <h1>Vaani</h1>
+    </div>
+    <button id="lang-chip" class="lang-chip" title="Change language">
+      <span id="lang-chip-label">…</span>
+    </button>
+  </header>
 
-<script src="/static/app.js"></script>
+  <main class="app">
+
+    <!-- Step 1: bring a paper -->
+    <section class="bring" id="bring" aria-label="Bring a paper">
+      <h2 class="step">1. Show me a paper</h2>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file-input" accept="image/*" hidden>
+        <input type="file" id="camera-input" accept="image/*" capture="environment" hidden>
+
+        <div class="dz-actions">
+          <button class="dz-btn primary" id="upload-btn">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M12 3v12m0-12-4 4m4-4 4 4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Upload
+          </button>
+          <button class="dz-btn" id="camera-btn">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+              <path d="M9 4 7 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3l-2-2H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z" fill="currentColor"/>
+            </svg>
+            Camera
+          </button>
+        </div>
+
+        <p class="dz-hint">Or drop a JPG / PNG here</p>
+        <p class="dz-mini"><a href="#" id="try-sample">Try a sample paper →</a></p>
+      </div>
+
+      <!-- Hidden sample row, shown when "Try a sample" clicked -->
+      <div class="paper-grid" id="paper-grid" hidden>
+        <!-- filled by JS so the markup tracks selectedLang -->
+      </div>
+    </section>
+
+    <!-- Step 2: ask -->
+    <section class="ask" id="ask-section" aria-label="Ask Vaani" hidden>
+      <h2 class="step">2. Ask</h2>
+      <div class="paper-preview">
+        <img id="paper-preview" alt="">
+      </div>
+      <div class="ask-row">
+        <input id="question" type="text" placeholder="Ask in your language…" autocomplete="off">
+        <button id="ask-btn" class="primary">Ask</button>
+      </div>
+      <p class="hint" id="hint"></p>
+    </section>
+
+    <!-- Step 3: reply -->
+    <section class="reply" id="reply" aria-label="Vaani's reply" hidden>
+      <h2 class="step">3. Reply</h2>
+      <div class="conversation" id="conversation"></div>
+      <details class="tool-call" id="tool-call-wrap" hidden>
+        <summary>Tool call</summary>
+        <pre id="tool-call"></pre>
+      </details>
+    </section>
+
+  </main>
+
+  <footer class="meta">
+    <span>Engine: <code id="engine">…</code></span>
+    <span>·</span>
+    <span><a href="https://github.com/prathik-anand/vaani" target="_blank" rel="noopener">github.com/prathik-anand/vaani</a></span>
+    <span>·</span>
+    <span>Built on Gemma 4</span>
+  </footer>
+
+</div>
+
+<script src="/static/app.js?v=3"></script>
 </body>
 </html>

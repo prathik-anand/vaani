@@ -37,6 +37,17 @@ app = FastAPI(title="Vaani", version="0.1.0", docs_url="/docs")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/samples", StaticFiles(directory=SAMPLES_DIR), name="samples")
 
+
+@app.middleware("http")
+async def _no_cache_static(request, call_next):
+    """Don't let browsers cache /static — the app evolves rapidly during a
+    demo and stale CSS/JS makes verification miserable."""
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+    return response
+
 # Single Inference instance — backend is chosen once at startup.
 # NoBackendError is caught so /health can guide the user to docs/SETUP.md
 # rather than crashing the whole process.

@@ -1,9 +1,22 @@
+# Internal planning / agent-generated artifacts — never push these.
+.planning/
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
 .pytest_cache/
 *.egg-info/
+
+# Virtualenvs
 .venv/
 venv/
+
+# Local env (real keys live here)
 .env
-*.log
+
+# OS / editor noise
 .DS_Store
+Thumbs.db
+*.log
+*.swp

@@ -11,8 +11,13 @@ behaviour, function-call surface, and UX are identical across all three.
 └──────────────────────────────────────────────┘
 ```
 
-`.env.example` ships with `VAANI_BACKEND=local`. Copy it to `.env` and
-uncomment a different section if you want to switch.
+There's no selector env var. Whichever credential you set wins:
+- `GEMINI_API_KEY` set → AI Studio
+- `OPENROUTER_API_KEY` set → OpenRouter
+- otherwise → local Ollama (if installed)
+- nothing set + no Ollama → app refuses to start with a setup hint
+
+Copy `.env.example` to `.env` and uncomment whichever block you want.
 
 ---
 
@@ -56,18 +61,16 @@ Simplest setup if you don't want to download weights. Free, no credit card.
 # 1. Grab a key
 # Open https://aistudio.google.com/apikey  → Create API key
 
-# 2. Drop it in either D:/hackthon/secrets/.env  or  project/.env
-echo "GEMINI_API_KEY=your_key_here" >> D:/hackthon/secrets/.env
+# 2. Drop it in ./.env  (or ~/.vaani/.env)
+echo "GEMINI_API_KEY=your_key_here" >> .env
 
-# 3. Tell Vaani to use AI Studio
-echo "VAANI_BACKEND=aistudio" >> project/.env
-
-# 4. Run
+# 3. Run
 make run
 ```
 
-Default model is `gemma-4-27b-it`. Override with `VAANI_AISTUDIO_MODEL=gemma-4-9b-it`
-or whichever Gemma variant the AI Studio rate limits favour today.
+The presence of `GEMINI_API_KEY` is the signal — Vaani auto-selects AI Studio
+over local Ollama when the key is set. Default model is `gemma-4-27b-it`. To
+override, edit the `MODEL = ...` line in `app/inference.py` (it's one line).
 
 Verify:
 ```bash
@@ -89,28 +92,23 @@ support, and you don't want to install Ollama.
 
 ```bash
 # 1. Get a key from https://openrouter.ai/keys
-echo "OPENROUTER_API_KEY=sk-or-v1-..." >> D:/hackthon/secrets/.env
+echo "OPENROUTER_API_KEY=sk-or-v1-..." >> .env
 
-# 2. Set the backend
-echo "VAANI_BACKEND=openrouter" >> project/.env
-
-# 3. Run
+# 2. Run
 make run
 ```
 
-Default model is `google/gemma-4-27b-it`. Override with `VAANI_OPENROUTER_MODEL`
-to pick e.g. `google/gemma-4-31b-it` or any other OpenRouter Gemma listing.
+Default model is `google/gemma-4-27b-it`. To override, edit `app/inference.py`.
 
 ---
 
-## Auto-select fallback
+## Selection order (when multiple are configured)
 
-If `VAANI_BACKEND` is unset, the inference layer probes in this order:
-1. Local Ollama (if `ollama list` shows a Gemma 4 tag)
-2. AI Studio (if `GEMINI_API_KEY` is in the env)
-3. OpenRouter (if `OPENROUTER_API_KEY` is in the env)
+1. `GEMINI_API_KEY`     → AI Studio wins
+2. `OPENROUTER_API_KEY` → OpenRouter wins
+3. local Ollama         → only if neither key is set
 
-If none of the three are configured, the app refuses to start and prints a
+If none of the three is configured, the app refuses to start and prints a
 short setup pointer at `/health`. Vaani does **not** ship with a silent
 scripted fallback in production — every demo runs against real Gemma 4.
 
@@ -118,13 +116,13 @@ scripted fallback in production — every demo runs against real Gemma 4.
 
 ## Where to put your `.env`
 
-Two places are loaded in order:
-1. `D:/hackthon/secrets/.env` — preferred for keys (machine-wide, shared with
-   the demo-video pipeline)
-2. `project/.env` — for backend selection + per-project overrides
+Loaded in this order (first match wins, environment always overrides):
 
-Either works. Keys in `secrets/.env` are picked up by the app *and* by the
-ElevenLabs narration synth in the video pipeline.
+1. `$VAANI_ENV_FILE` — explicit override (`VAANI_ENV_FILE=/path/to/.env make run`)
+2. `./.env` in the project root — preferred per-clone setup
+3. `~/.vaani/.env` — user-wide, useful if you maintain multiple clones
+
+`./.env` is in `.gitignore`, so your real keys never end up in commits.
 
 ---
 

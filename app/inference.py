@@ -39,8 +39,19 @@ log = logging.getLogger("vaani.inference")
 # ── secrets file loader ─────────────────────────────────────────────────────
 
 def _load_secrets_file() -> None:
-    for p in (Path("D:/hackthon/secrets/.env"),
-              Path(__file__).resolve().parent.parent / ".env"):
+    """Pull keys from a .env file into os.environ, in priority order:
+      1. $VAANI_ENV_FILE (explicit override)
+      2. ./.env in the project root (preferred — portable, per-clone)
+      3. ~/.vaani/.env (user-wide; useful if you run multiple clones)
+    Anything that's already set in the real environment wins; .env never
+    overrides an explicit export.
+    """
+    candidates: List[Path] = []
+    if env_file := os.getenv("VAANI_ENV_FILE"):
+        candidates.append(Path(env_file))
+    candidates.append(Path(__file__).resolve().parent.parent / ".env")
+    candidates.append(Path.home() / ".vaani" / ".env")
+    for p in candidates:
         if not p.exists():
             continue
         for line in p.read_text(encoding="utf-8").splitlines():
@@ -277,8 +288,8 @@ class Inference:
             return
 
         raise NoBackendError(
-            "No Gemma 4 backend configured. Drop ONE of these in "
-            "D:/hackthon/secrets/.env or project/.env, then restart:\n"
+            "No Gemma 4 backend configured. Drop ONE of these in `./.env` "
+            "(or `~/.vaani/.env`), then restart:\n"
             "  GEMINI_API_KEY=...        (https://aistudio.google.com/apikey, free)\n"
             "  OPENROUTER_API_KEY=...    (https://openrouter.ai/keys)\n"
             "  — OR install Ollama and run `ollama pull gemma4:e4b`\n"

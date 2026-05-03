@@ -14,7 +14,7 @@ This is the storyboard the demo video at `video/vaani-demo.mp4` was rendered fro
 | 8 | 0:31 | Defensibility | Phone carousel: Tamil receipt with `set_reminder` → Marathi letter with `set_reminder` → urgent fever paper with `flag_red_flag` | "The same product reads Tamil. Reads Marathi. Flags an urgent fever as urgent." |
 | 9 | 0:41 | Why now | Dark card: "Gemma 4 E4B" + 4 bullets (vision · voice · 140 langs · 4 GB on-device) | "Gemma 4 E4B. Vision, voice, a hundred and forty languages. Four gigabytes. On a phone." |
 | 10 | 0:46 | Thesis | "If you can speak, you can use the internet." | (same) |
-| 11 | 0:50 | End card / ask | Vaani · Built on Gemma 4 · Open source · github.com/c16prathik/vaani | "Vaani. Built on Gemma 4. Open source. Fork it tonight." |
+| 11 | 0:50 | End card / ask | Vaani · Built on Gemma 4 · Open source · github.com/prathik-anand/vaani | "Vaani. Built on Gemma 4. Open source. Fork it tonight." |
 
 ## Hard cuts vs soft fades
 

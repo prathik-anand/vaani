@@ -24,7 +24,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app import tools
-from app.inference import Inference
+from app.inference import Inference, NoBackendError
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 log = logging.getLogger("vaani")
@@ -38,8 +38,17 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/samples", StaticFiles(directory=SAMPLES_DIR), name="samples")
 
 # Single Inference instance — backend is chosen once at startup.
-INFERENCE = Inference()
-log.info("vaani: engine=%s, stub=%s", INFERENCE.engine_name, INFERENCE.is_stub)
+# NoBackendError is caught so /health can guide the user to docs/SETUP.md
+# rather than crashing the whole process.
+INFERENCE: Optional[Inference]
+_BACKEND_ERROR: Optional[str] = None
+try:
+    INFERENCE = Inference()
+    log.info("vaani: engine=%s, stub=%s", INFERENCE.engine_name, INFERENCE.is_stub)
+except NoBackendError as e:
+    INFERENCE = None
+    _BACKEND_ERROR = str(e)
+    log.error("Vaani has no backend configured:\n%s", e)
 
 
 class HealthResponse(BaseModel):
@@ -75,6 +84,10 @@ def root() -> FileResponse:
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
+    if INFERENCE is None:
+        return HealthResponse(
+            status="no_backend", engine="—", is_stub=False, version="0.1.0",
+        )
     return HealthResponse(
         status="ok",
         engine=INFERENCE.engine_name,
@@ -118,6 +131,15 @@ async def turn(
     the in-app speech-to-text is browser-side (Web Speech API), so the server
     receives the resulting *text* in `text`.
     """
+    if INFERENCE is None:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "no_backend",
+                "detail": _BACKEND_ERROR or "no Gemma 4 backend configured — see docs/SETUP.md",
+            },
+        )
+
     image_b64: Optional[str] = None
     fname: Optional[str] = image_filename
     if image is not None:
@@ -141,13 +163,31 @@ async def turn(
 @app.get("/info")
 def info() -> dict:
     """Verbose info — used by the README's `make demo` smoke check."""
+    if INFERENCE is None:
+        return {
+            "name": "Vaani",
+            "tagline": "If you can speak, you can use the internet.",
+            "engine": None,
+            "is_stub": False,
+            "backend_error": _BACKEND_ERROR,
+            "tools": tools.names(),
+            "endpoints": ["/", "/health", "/tools", "/samples", "/turn", "/info"],
+            "offline": False,
+            "upstream_calls": "n/a — no backend configured",
+        }
+    engine = INFERENCE.engine_name
+    is_local = engine.startswith("ollama/") or INFERENCE.is_stub
     return {
         "name": "Vaani",
         "tagline": "If you can speak, you can use the internet.",
-        "engine": INFERENCE.engine_name,
+        "engine": engine,
         "is_stub": INFERENCE.is_stub,
         "tools": tools.names(),
         "endpoints": ["/", "/health", "/tools", "/samples", "/turn", "/info"],
-        "offline": True,
-        "upstream_calls": "none during normal operation",
+        "offline": is_local,
+        "upstream_calls": (
+            "none during normal operation"
+            if is_local
+            else f"calls upstream API for {engine.split('/')[0]}"
+        ),
     }

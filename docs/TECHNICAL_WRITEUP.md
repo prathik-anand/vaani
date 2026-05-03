@@ -3,7 +3,7 @@
 **Hackathon:** Gemma 4 Good Hackathon (Kaggle × Google DeepMind)
 **Track:** Digital Equity & Inclusivity
 **Submitter:** Prathik (Pune, India)
-**Repo:** github.com/c16prathik/vaani
+**Repo:** github.com/prathik-anand/vaani
 **Demo video:** see Kaggle submission gallery
 
 ---

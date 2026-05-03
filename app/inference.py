@@ -190,6 +190,64 @@ def _filter_args_for_tool(name: str, args: Dict[str, Any]) -> Dict[str, Any]:
     return args
 
 
+_FALLBACK_MESSAGES = {
+    "hi": "मुझे यह कागज़ साफ़ नहीं दिख रहा। एक बार और कोशिश कीजिए।",
+    "ta": "என்னால் இந்தக் கடிதம் தெளிவாகத் தெரியவில்லை. மீண்டும் முயற்சி செய்யுங்கள்.",
+    "mr": "हा कागद मला नीट दिसत नाही. कृपया पुन्हा प्रयत्न करा.",
+    "bn": "আমি এই কাগজটি স্পষ্ট দেখতে পাচ্ছি না। আবার চেষ্টা করুন।",
+    "te": "ఈ కాగితం స్పష్టంగా కనిపించడం లేదు. మళ్ళీ ప్రయత్నించండి.",
+    "gu": "મને આ કાગળ સ્પષ્ટ દેખાતો નથી. ફરી પ્રયાસ કરો.",
+    "kn": "ಈ ಕಾಗದ ನನಗೆ ಸ್ಪಷ್ಟವಾಗಿ ಕಾಣಿಸುತ್ತಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "ml": "എനിക്ക് ഈ പേപ്പർ വ്യക്തമായി കാണാൻ കഴിയുന്നില്ല. വീണ്ടും ശ്രമിക്കുക.",
+    "pa": "ਮੈਨੂੰ ਇਹ ਕਾਗਜ਼ ਸਾਫ਼ ਨਹੀਂ ਦਿਖ ਰਿਹਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "ur": "مجھے یہ کاغذ صاف نہیں دکھ رہا۔ دوبارہ کوشش کریں۔",
+    "ar": "لا أستطيع رؤية هذه الورقة بوضوح. حاول مرة أخرى.",
+    "es": "No puedo ver este papel claramente. Inténtalo de nuevo.",
+    "fr": "Je ne vois pas clairement ce papier. Veuillez réessayer.",
+    "pt": "Não consigo ver este papel claramente. Tente novamente.",
+    "en": "I couldn't read this paper clearly. Please try again with a sharper photo.",
+}
+
+
+def _safe_fallback_message(lang: str) -> str:
+    return _FALLBACK_MESSAGES.get(lang or "en", _FALLBACK_MESSAGES["en"])
+
+
+def _looks_like_json(s: str) -> bool:
+    """Quick check: does this string look like a JSON envelope leak?"""
+    s = s.strip()
+    if not s:
+        return False
+    # Starts with { or [ AND has typical JSON tokens
+    if s[0] in "{[" and ('"reply"' in s or '"tool_call"' in s or '"name"' in s and '"args"' in s):
+        return True
+    # Pure backtick-or-brace runs
+    if all(c in '{}[]"`,: \n' for c in s[:30]):
+        return True
+    return False
+
+
+def _recover_from_args(fn_calls: List[Dict[str, Any]]) -> str:
+    """Last-ditch: pull a user-facing string out of the tool call's args.
+
+    When Gemma 4 gets confused by the schema it sometimes routes the actual
+    user-facing message into tool_call.args.intent / args.reason / args.topic.
+    Pick the longest such string as a usable reply.
+    """
+    if not fn_calls:
+        return ""
+    args = fn_calls[0].get("args") or {}
+    candidates = []
+    for key in ("intent", "reason", "symptom", "topic", "explanation"):
+        v = args.get(key)
+        if isinstance(v, str) and len(v) > 15:
+            candidates.append(v)
+    if not candidates:
+        return ""
+    candidates.sort(key=len, reverse=True)
+    return candidates[0]
+
+
 def _clean_reply(text: str) -> str:
     """Drop chain-of-thought / meta-commentary; keep the user-facing reply.
 
@@ -345,13 +403,24 @@ class _AIStudio:
                     "name": tc["name"],
                     "args": _filter_args_for_tool(tc["name"], tc.get("args") or {}),
                 })
-        # If reply parsed empty or degenerate (model wrote just punctuation),
-        # extract a real sentence from the raw text via the heuristic cleaner.
-        if len(reply_text) < 10 or all(not c.isalnum() for c in reply_text):
-            log.info("AI Studio: schema reply looked degenerate, falling back to cleaner")
-            cleaned = _clean_reply(raw)
-            if len(cleaned) > len(reply_text):
-                reply_text = cleaned
+        # If reply parsed empty or degenerate (model emitted just `{` or punctuation),
+        # try recovery in three steps:
+        #   1. Look inside tool_call.args for the longest user-facing string field
+        #      (intent, symptom, reason, topic) — the model often misroutes the
+        #      reply text into args when it gets confused by the schema.
+        #   2. Fall back to the heuristic cleaner on the raw response.
+        #   3. Final guarded fallback: a generic localized "couldn't read clearly"
+        #      message so the UI never shows a JSON envelope verbatim.
+        if len(reply_text) < 15 or all(not c.isalnum() for c in reply_text):
+            log.info("AI Studio: degenerate reply (%r), running recovery", reply_text)
+            recovered = _recover_from_args(fn_calls)
+            if not recovered:
+                recovered = _clean_reply(raw)
+            # Reject anything that still looks like JSON
+            if recovered and not _looks_like_json(recovered):
+                reply_text = recovered
+            else:
+                reply_text = _safe_fallback_message(lang)
 
         return TurnResult(
             reply_text=reply_text,

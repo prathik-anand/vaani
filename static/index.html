@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vaani — voice for paper</title>
-<link rel="stylesheet" href="/static/style.css?v=3">
+<title>Vaani</title>
+<link rel="stylesheet" href="/static/style.css?v=4">
 </head>
 <body>
 
@@ -18,15 +18,13 @@
       <span>مرحبا</span>
       <span>नमस्कार</span>
     </div>
-    <h1 class="onb-h">Which language do you speak?</h1>
-    <p class="onb-sub">I'll explain papers to you in this language. You can change it any time.</p>
-
-    <div class="lang-grid" id="lang-grid"><!-- filled by JS --></div>
-
+    <h1 class="onb-h" data-i18n="onb_question">Which language do you speak?</h1>
+    <p class="onb-sub" data-i18n="onb_sub">I'll explain papers to you in this language. You can change it any time.</p>
+    <div class="lang-grid" id="lang-grid"></div>
     <details class="lang-more">
-      <summary>More languages</summary>
-      <input id="lang-search" type="search" placeholder="Search 140+ languages…" autocomplete="off">
-      <div class="lang-list" id="lang-list"><!-- filled by JS --></div>
+      <summary data-i18n="onb_more">More languages</summary>
+      <input id="lang-search" type="search" data-i18n-attr="placeholder|onb_search" placeholder="Search 140+ languages…" autocomplete="off">
+      <div class="lang-list" id="lang-list"></div>
     </details>
   </div>
 </section>
@@ -39,80 +37,122 @@
       <span class="logo">V</span>
       <h1>Vaani</h1>
     </div>
-    <button id="lang-chip" class="lang-chip" title="Change language">
+    <button id="lang-chip" class="lang-chip" data-i18n-attr="title|change_language" title="Change language">
       <span id="lang-chip-label">…</span>
     </button>
   </header>
 
   <main class="app">
 
-    <!-- Step 1: bring a paper -->
-    <section class="bring" id="bring" aria-label="Bring a paper">
-      <h2 class="step">1. Show me a paper</h2>
+    <!-- Bring a paper -->
+    <section class="bring" id="bring">
+      <h2 class="step" data-i18n="step_show">Show me a paper</h2>
       <div class="dropzone" id="dropzone">
         <input type="file" id="file-input" accept="image/*" hidden>
         <input type="file" id="camera-input" accept="image/*" capture="environment" hidden>
-
         <div class="dz-actions">
           <button class="dz-btn primary" id="upload-btn">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
               <path d="M12 3v12m0-12-4 4m4-4 4 4M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Upload
+            <span data-i18n="btn_upload">Upload</span>
           </button>
           <button class="dz-btn" id="camera-btn">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
               <path d="M9 4 7 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3l-2-2H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10z" fill="currentColor"/>
             </svg>
-            Camera
+            <span data-i18n="btn_camera">Camera</span>
           </button>
         </div>
-
-        <p class="dz-hint">Or drop a JPG / PNG here</p>
-        <p class="dz-mini"><a href="#" id="try-sample">Try a sample paper →</a></p>
+        <p class="dz-hint" data-i18n="dz_hint">Or drop an image here</p>
+        <p class="dz-mini"><a href="#" id="try-sample" data-i18n="try_sample">Try a sample paper →</a></p>
       </div>
-
-      <!-- Hidden sample row, shown when "Try a sample" clicked -->
-      <div class="paper-grid" id="paper-grid" hidden>
-        <!-- filled by JS so the markup tracks selectedLang -->
-      </div>
+      <div class="paper-grid" id="paper-grid" hidden></div>
     </section>
 
-    <!-- Step 2: ask -->
-    <section class="ask" id="ask-section" aria-label="Ask Vaani" hidden>
-      <h2 class="step">2. Ask</h2>
-      <div class="paper-preview">
-        <img id="paper-preview" alt="">
+    <!-- Ask -->
+    <section class="ask-stage" id="ask-stage" hidden>
+      <h2 class="step" data-i18n="step_ask">Ask</h2>
+      <div class="paper-preview"><img id="paper-preview" alt=""></div>
+
+      <!-- Voice-first input: big mic, holds-to-talk -->
+      <div class="ask-controls">
+        <button id="mic-btn" class="mic-big" type="button">
+          <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true">
+            <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="mic-state" id="mic-state">
+          <span class="mic-headline" data-i18n="mic_idle">Hold to speak</span>
+          <span class="mic-sub" data-i18n="mic_idle_sub">or type your question below</span>
+        </div>
       </div>
-      <div class="ask-row">
-        <input id="question" type="text" placeholder="Ask in your language…" autocomplete="off">
-        <button id="ask-btn" class="primary">Ask</button>
-      </div>
-      <p class="hint" id="hint"></p>
+
+      <details class="type-fallback">
+        <summary data-i18n="type_instead">Type instead</summary>
+        <div class="ask-row">
+          <input id="question" type="text" data-i18n-attr="placeholder|ask_placeholder" placeholder="Ask in your language…" autocomplete="off">
+          <button id="ask-btn" class="primary" data-i18n="btn_ask">Ask</button>
+        </div>
+      </details>
     </section>
 
-    <!-- Step 3: reply -->
-    <section class="reply" id="reply" aria-label="Vaani's reply" hidden>
-      <h2 class="step">3. Reply</h2>
-      <div class="conversation" id="conversation"></div>
-      <details class="tool-call" id="tool-call-wrap" hidden>
-        <summary>Tool call</summary>
+    <!-- Reply: voice-first. Audio is the dominant element. -->
+    <section class="reply-stage" id="reply-stage" hidden>
+      <h2 class="step" data-i18n="step_reply">Reply</h2>
+
+      <div class="audio-card" id="audio-card">
+        <div class="audio-disc" id="audio-disc" aria-hidden="true">
+          <div class="audio-pulse"></div>
+          <button id="audio-replay" class="audio-replay" type="button">
+            <svg id="audio-icon-play" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true">
+              <path d="M8 5v14l11-7L8 5z" fill="currentColor"/>
+            </svg>
+            <svg id="audio-icon-stop" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true" hidden>
+              <path d="M6 6h4v12H6zM14 6h4v12h-4z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+        <div class="audio-meta">
+          <p class="audio-status" id="audio-status" data-i18n="audio_thinking">Thinking…</p>
+          <p class="audio-lang" id="audio-lang"></p>
+        </div>
+      </div>
+
+      <!-- Friendly action card (set_reminder / flag_red_flag etc.) localized -->
+      <div class="action-card" id="action-card" hidden>
+        <div class="action-icon" id="action-icon">📌</div>
+        <div class="action-body">
+          <p class="action-title" id="action-title"></p>
+          <p class="action-desc" id="action-desc"></p>
+        </div>
+      </div>
+
+      <details class="transcript-fold" id="transcript-fold">
+        <summary data-i18n="show_transcript">Show what was said</summary>
+        <div class="transcript-bubble" id="transcript"></div>
+      </details>
+
+      <details class="tool-call-fold" id="tool-call-fold" hidden>
+        <summary>Tool call (debug)</summary>
         <pre id="tool-call"></pre>
       </details>
+
+      <button id="ask-again" class="ask-again" type="button" hidden>
+        <span data-i18n="ask_again">Show another paper</span>
+      </button>
     </section>
 
   </main>
 
-  <footer class="meta">
-    <span>Engine: <code id="engine">…</code></span>
+  <footer class="meta" id="footer-meta">
+    <span data-i18n="footer_built">Built on Gemma 4</span>
     <span>·</span>
-    <span><a href="https://github.com/prathik-anand/vaani" target="_blank" rel="noopener">github.com/prathik-anand/vaani</a></span>
-    <span>·</span>
-    <span>Built on Gemma 4</span>
+    <span>Open source</span>
   </footer>
 
 </div>
 
-<script src="/static/app.js?v=3"></script>
+<script src="/static/app.js?v=4"></script>
 </body>
 </html>

@@ -623,6 +623,20 @@ html, body {
   font-size: 13px; color: var(--ink-soft);
 }
 
+/* ── Reduced motion: respect user preference ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  .audio-disc.playing .audio-pulse,
+  .audio-disc.playing::before,
+  .audio-disc.playing::after,
+  .audio-replay.thinking,
+  .mic-big.recording { animation: none !important; }
+}
+
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .topbar { padding: 24px 20px 12px; }

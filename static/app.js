@@ -507,6 +507,7 @@
     samples.forEach(s => {
       const c = document.createElement('button');
       c.className = 'card' + (s.real ? ' real' : '');
+      c.dataset.name = s.name;
       const tagCls = s.urgent ? ' urgent' : (s.real ? ' real' : '');
       c.innerHTML = `<img src="${s.url}" alt=""><span class="card-tag${tagCls}">${escape(s.tag)}</span>`;
       c.addEventListener('click', () => {

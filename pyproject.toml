@@ -1,0 +1,33 @@
+[project]
+name = "vaani"
+version = "0.1.0"
+description = "Voice-first offline interpreter for low-literacy adults — Gemma 4 Good Hackathon submission"
+authors = [{ name = "Prathik" }]
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "python-multipart>=0.0.9",
+  "httpx>=0.27",
+  "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+]
+hf = [
+  "transformers>=4.45",
+  "torch>=2.2",
+  "bitsandbytes>=0.42",
+  "accelerate>=0.30",
+  "pillow>=10.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]

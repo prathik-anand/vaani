@@ -527,7 +527,10 @@
     paperPreview.src = URL.createObjectURL(file);
     askStage.hidden = false;
     document.getElementById('reply-stage').hidden = true;  // reset previous reply
-    askStage.scrollIntoView({behavior:'smooth', block:'start'});
+    const app = document.querySelector('.app');
+    app.classList.remove('reply-active');
+    app.classList.add('ask-active');
+    setTimeout(() => askStage.scrollIntoView({behavior:'smooth', block:'start'}), 60);
   }
 
   // ── Ask: hold-to-talk mic + type fallback ────────────────────
@@ -646,8 +649,10 @@
   askAgain.addEventListener('click', () => {
     replyStage.hidden = true;
     askStage.hidden = true;
-    document.querySelector('.app').classList.remove('reply-active');
-    document.getElementById('bring').scrollIntoView({behavior:'smooth', block:'start'});
+    const app = document.querySelector('.app');
+    app.classList.remove('reply-active');
+    app.classList.remove('ask-active');
+    setTimeout(() => document.getElementById('bring').scrollIntoView({behavior:'smooth', block:'start'}), 60);
   });
 
   function setAudioState(state) {

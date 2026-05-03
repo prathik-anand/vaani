@@ -179,9 +179,10 @@ html, body {
   padding: 8px 32px 80px;
   display: flex; flex-direction: column; gap: 32px;
 }
-/* When the reply is on stage, the previous panels collapse out of the way
-   so the audio is the only thing in view. Reversible — Show another paper
-   removes the class and they slide back. */
+/* Stage transitions — when ask is on stage the bring panel folds away so
+   the user focuses on the paper + mic. When reply takes over, both bring
+   and ask fold away so the audio dominates. Reversible by Show another paper. */
+.app.ask-active .bring,
 .app.reply-active .bring,
 .app.reply-active .ask-stage {
   max-height: 0;

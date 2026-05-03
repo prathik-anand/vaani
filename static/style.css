@@ -228,11 +228,11 @@ html, body {
 /* ── Dropzone ──────────────────────────────────────────────────── */
 .dropzone {
   background: var(--surface);
-  border: 2px dashed var(--line-strong);
+  border: 1.5px dashed var(--line-strong);
   border-radius: 18px;
-  padding: 56px 32px;
+  padding: 40px 32px 28px;
   text-align: center;
-  transition: border-color .12s ease, background .12s ease;
+  transition: border-color .15s ease, background .15s ease;
 }
 .dropzone.drag {
   border-color: var(--accent);
@@ -270,12 +270,22 @@ html, body {
 }
 .dz-mini a:hover { color: var(--ink); border-bottom-color: var(--ink); }
 
-/* ── Sample papers (revealed by Try a sample) ─────────────────── */
+/* ── Sample papers — visible by default, breadth signal ───────── */
+.paper-grid-label {
+  margin: 28px 0 12px;
+  font-size: 13px; font-weight: 600;
+  color: var(--ink-soft);
+  letter-spacing: 0.1px;
+}
 .paper-grid {
-  margin-top: 18px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
+}
+@media (max-width: 720px) {
+  .paper-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
 }
 .card {
   position: relative;

@@ -89,6 +89,7 @@
       btn_ask: 'Ask',
       dz_hint: 'Or drop an image here',
       try_sample: 'Try a sample paper →',
+      samples_label: 'Or try one of these',
       mic_idle: 'Hold to speak',
       mic_idle_sub: 'or type your question below',
       mic_listening: 'Listening…',
@@ -127,6 +128,7 @@
       btn_ask: 'पूछें',
       dz_hint: 'या यहाँ कोई तस्वीर डालिए',
       try_sample: 'एक नमूना देखें →',
+      samples_label: 'या इनमें से कोई आज़माएँ',
       mic_idle: 'बोलने के लिए दबाए रखें',
       mic_idle_sub: 'या नीचे अपना सवाल लिखिए',
       mic_listening: 'सुन रही हूँ…',
@@ -165,6 +167,7 @@
       btn_ask: 'கேள்',
       dz_hint: 'அல்லது படத்தை இங்கே போடுங்கள்',
       try_sample: 'மாதிரியை பாருங்கள் →',
+      samples_label: 'அல்லது இவற்றில் ஒன்றை முயற்சி செய்யுங்கள்',
       mic_idle: 'பேச அழுத்திப் பிடியுங்கள்',
       mic_idle_sub: 'அல்லது கீழே தட்டச்சு செய்யுங்கள்',
       mic_listening: 'கேட்கிறேன்…',
@@ -203,6 +206,7 @@
       btn_ask: 'विचारा',
       dz_hint: 'किंवा इथे चित्र टाका',
       try_sample: 'नमुना पहा →',
+      samples_label: 'किंवा यापैकी एक वापरा',
       mic_idle: 'बोलण्यासाठी दाबून ठेवा',
       mic_idle_sub: 'किंवा खाली टाइप करा',
       mic_listening: 'ऐकत आहे…',
@@ -241,6 +245,7 @@
       btn_ask: 'জিজ্ঞাসা',
       dz_hint: 'বা এখানে ছবি ফেলুন',
       try_sample: 'নমুনা দেখুন →',
+      samples_label: 'অথবা এর মধ্যে একটি চেষ্টা করুন',
       mic_idle: 'কথা বলতে চাপ দিয়ে রাখুন',
       mic_idle_sub: 'বা নীচে টাইপ করুন',
       mic_listening: 'শুনছি…',
@@ -279,6 +284,7 @@
       btn_ask: 'Preguntar',
       dz_hint: 'O suelta una imagen aquí',
       try_sample: 'Probar un papel de ejemplo →',
+      samples_label: 'O prueba uno de estos',
       mic_idle: 'Mantén presionado para hablar',
       mic_idle_sub: 'o escribe tu pregunta abajo',
       mic_listening: 'Escuchando…',
@@ -317,6 +323,7 @@
       btn_ask: 'اسأل',
       dz_hint: 'أو أسقط صورة هنا',
       try_sample: 'جرب ورقة نموذجية ←',
+      samples_label: 'أو جرب واحدة من هذه',
       mic_idle: 'استمر بالضغط للتحدث',
       mic_idle_sub: 'أو اكتب سؤالك أدناه',
       mic_listening: 'أستمع…',
@@ -462,7 +469,6 @@
   const cameraInput = document.getElementById('camera-input');
   const uploadBtn = document.getElementById('upload-btn');
   const cameraBtn = document.getElementById('camera-btn');
-  const trySample = document.getElementById('try-sample');
   const paperGrid = document.getElementById('paper-grid');
 
   uploadBtn.addEventListener('click', () => fileInput.click());
@@ -481,12 +487,6 @@
     const f = e.dataTransfer.files && e.dataTransfer.files[0];
     if (f) onPaperSelected(f);
   });
-  trySample.addEventListener('click', e => {
-    e.preventDefault();
-    paperGrid.hidden = !paperGrid.hidden;
-    if (!paperGrid.hidden) paperGrid.scrollIntoView({behavior:'smooth', block:'nearest'});
-  });
-
   function renderSamples() {
     const samples = [
       // The real one. Actual student's handwritten teacher notice, brought home in

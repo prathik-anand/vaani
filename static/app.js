@@ -639,6 +639,7 @@
   askAgain.addEventListener('click', () => {
     replyStage.hidden = true;
     askStage.hidden = true;
+    document.querySelector('.app').classList.remove('reply-active');
     document.getElementById('bring').scrollIntoView({behavior:'smooth', block:'start'});
   });
 
@@ -659,6 +660,7 @@
   async function sendTurn(question) {
     if (!currentBlob) return;
     replyStage.hidden = false;
+    document.querySelector('.app').classList.add('reply-active');
     setAudioState('thinking');
     audioLang.textContent = `${user.native} · ${user.english}`;
     transcriptFold.removeAttribute('open');
@@ -666,7 +668,8 @@
     actionCard.hidden = true;
     askAgain.hidden = true;
     if (!DEBUG) toolCallFold.hidden = true;
-    replyStage.scrollIntoView({behavior:'smooth', block:'start'});
+    // Pin the reply at the top of the viewport for a clean entrance.
+    setTimeout(() => replyStage.scrollIntoView({behavior:'smooth', block:'start'}), 60);
 
     const fd = new FormData();
     fd.append('text', question);
